@@ -1,0 +1,45 @@
+---
+- name: Ensure Docker is installed
+  hosts: all
+  become: yes
+  gather_facts: False
+  pre_tasks:
+    - name: Install Python2 if not available
+      vars:
+        - ansible_python_interpreter: /usr/bin/python3
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      retries: 30
+      delay: 10
+    - setup: # aka gather_facts
+  tasks:
+    - name: Check if Docker is installed
+      command: docker
+      register: docker_installed
+      ignore_errors: True
+
+    - name: Install Docker
+      include_role:
+        name: docker
+      vars:
+        docker_users:
+          - ubuntu
+      when: "docker_installed is failed"
+
+    - name: Install system packages
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - python-pip
+      register: pkg_result
+      until: pkg_result is success
+      retries: 30
+      delay: 10
+
+    - name: Install pip modules
+      pip:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - docker-py
+...
