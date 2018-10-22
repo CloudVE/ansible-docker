@@ -42,4 +42,11 @@
         state: present
       with_items:
         - docker-py
+
+    - name: Start Pulsar container
+      docker_container:
+        name: Pulsar
+        image: "{{ pulsar_image|default('galaxy/pulsar:dev') }}"
+        env:
+          PULSAR_CONFIG_PRIVATE_TOKEN: "{{ pulsar_token }}"
 ...
