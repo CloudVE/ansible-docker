@@ -47,6 +47,7 @@
       docker_container:
         name: Pulsar
         image: "{{ pulsar_image|default('galaxy/pulsar:dev') }}"
+        privileged: yes
         published_ports:
           - "8913:{{ pulsar_port|default('8913') }}"
         env:
